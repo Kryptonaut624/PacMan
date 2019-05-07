@@ -196,14 +196,14 @@
 				    this.y+=1;
 				    this.speedY=0;
 				  }
-				  else if(this.speedX==1&&isWall(this.x+this.width+5, this.y-this.height-5)==true){
+				  if(this.speedX==1&&isWall(this.x-this.width-5, this.y-this.height-5)==true){
 				    this.x-=1;
 				  }
-				  else if(this.speedX==-1&&isWall(this.x-this.width-5, this.y-this.height-5)==true){
+				  else if(this.speedX==-1&&isWall(this.x+this.width+5, this.y-this.height-5)==true){
 				    this.x+=1;
 				  }
-				  else{
-				    this.y+=1;
+				  else if(this.speedX!=0){
+				    this.speedY=0;
 				  }
 				}
 				if(this.speedY==1){
@@ -211,11 +211,14 @@
 				    this.y-=1;
 				    this.speedY=0;
 				  }
-				  else if(this.speedX==1&&isWall(this.x+this.width+5, this.y+this.height+5)==true){
+				  if(this.speedX==1&&isWall(this.x-this.width-5, this.y+this.height+5)==true){
 				    this.x-=1;
 				  }
-				  else if(this.speedX==-1&&isWall(this.x-this.width-5, this.y+this.height+5)==true){
+				  else if(this.speedX==-1&&isWall(this.x+this.width+5, this.y+this.height+5)==true){
 				    this.x+=1;
+				  }
+				  else if(this.speedX!=0){
+				    this.speedY=0;
 				  }
 				}
 				if(this.speedX==-1){
@@ -223,11 +226,14 @@
 				    this.x+=1;
 				    this.speedX=0;
 				  }
-				  else if(this.speedY==1&&isWall(this.x+this.width+5, this.y+this.height+5)==true){
+				  if(this.speedY==1&&isWall(this.x-this.width-5, this.y-this.height-5)==true){
 				    this.y-=1;
 				  }
-				  else if(this.speedY==-1&&isWall(this.x+this.width+5, this.y-this.height-5)==true){
+				  else if(this.speedY==-1&&isWall(this.x-this.width-5, this.y+this.height+5)==true){
 				    this.y+=1;
+				  }
+				  else if(this.speedY!=0){
+				    this.speedX=0;
 				  }
 				}
 				if(this.speedX==1){
@@ -235,11 +241,14 @@
 				    this.x-=1;
 				    this.speedX=0;
 				  }
-				  else if(this.speedY==1&&isWall(this.x-this.width-5, this.y+this.height+5)==true){
+				  if(this.speedY==1&&isWall(this.x+this.width+5, this.y-this.height-5)==true){
 				    this.y-=1;
 				  }
-				  else if(this.speedY==-1&&isWall(this.x-this.width-5, this.y-this.height-5)==true){
+				  else if(this.speedY==-1&&isWall(this.x+this.width+5, this.y+this.height+5)==true){
 				    this.y+=1;
+				  }
+				  else if(this.speedY!=0){
+				    this.speedX=0;
 				  }
 				}
 			  }
@@ -440,9 +449,7 @@
 		else if(ghost.speedX==1){
 		  return "x";
 		}
-		else{
-		  return "0";
-		}
+		return "0";
 	  }
 	  function updateGameArea(){
 	    gameArea.clear();
@@ -469,11 +476,11 @@
 				    ghosts[g].speedY=-1;
 				  }
 				}
-			    if(ghosts[g].y<pac.y&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y+ghosts[g].height+5)==false){
+			    if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
 				  ghosts[g].speedX=0;
 				  ghosts[g].speedY=1;
 				}
-				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y-ghosts[g].height-5)==false){
+				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
 				  ghosts[g].speedX=0;
 				  ghosts[g].speedY=-1;
 				}
@@ -488,11 +495,11 @@
 				    ghosts[g].speedY=-1;
 				  }
 				}
-			    if(ghosts[g].y<pac.y&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y+ghosts[g].height+5)==false){
+			    if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
 				  ghosts[g].speedX=0;
 				  ghosts[g].speedY=1;
 				}
-				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y-ghosts[g].height-5)==false){
+				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
 				  ghosts[g].speedX=0;
 				  ghosts[g].speedY=-1;
 				}
@@ -507,11 +514,11 @@
 				    ghosts[g].speedX=-1;
 				  }
 				}
-			    if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y-ghosts[g].width-5)==false){
+			    if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
 				  ghosts[g].speedY=0;
 				  ghosts[g].speedX=1;
 				}
-				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y-ghosts[g].width-5)==false){
+				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
 				  ghosts[g].speedY=0;
 				  ghosts[g].speedX=-1;
 				}
@@ -526,11 +533,11 @@
 				    ghosts[g].speedX=-1;
 				  }
 				}
-			    if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y+ghosts[g].height+5)==false){
+			    if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
 				  ghosts[g].speedY=0;
 				  ghosts[g].speedX=1;
 				}
-				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y+ghosts[g].height+5)==false){
+				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
 				  ghosts[g].speedY=0;
 				  ghosts[g].speedX=-1;
 				}
@@ -539,113 +546,6 @@
 			    ghosts[g].speedX=0;
 				ghosts[g].speedY=0;
 			  }
-			  /*if(ghosts[g].x>pac.x){
-			    if(isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
-				  ghosts[g].speedX=-1;
-				  ghosts[g].speedY=0;
-				}
-				else{
-				  ghosts[g].speedX=0;
-				  if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
-				    ghosts[g].speedY=1;
-				  }
-				  else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
-				    ghosts[g].speedY=-1;
-				  }
-				  else{
-				    ghosts[g].speedX=1;
-				  }
-				}
-			  }
-			  else if(ghosts[g].x<pac.x){
-			    if(isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
-				  ghosts[g].speedX=1;
-				  ghosts[g].speedY=0;
-				}
-				else{
-				  ghosts[g].speedX=0;
-				  if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
-				    ghosts[g].speedY=1;
-				  }
-				  else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
-				  ghosts[g].speedY=-1;
-				  }
-				  else{
-				    ghosts[g].speedX=-1;
-				  }
-				}
-			  }
-			  else{
-			    ghosts[g].speedX=0;
-				if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
-				  ghosts[g].speedY=1;
-				}
-				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
-				  ghosts[g].speedY=-1;
-				}
-				else{
-				  if(isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
-				    ghosts[g].speedX=1;
-				  }
-				  else{
-				    ghosts[g].speedX=-1;
-				  }
-				}
-			  }
-			  if(ghosts[g].y>pac.y){
-			    if(isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
-				  ghosts[g].speedY=-1;
-				  ghosts[g].speedX=0;
-				}
-				else{
-				  ghosts[g].speedY=0;
-				  if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
-				    ghosts[g].speedX=1;
-				  }
-				  else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
-				    ghosts[g].speedX=-1;
-				  }
-				  else{
-				    ghosts[g].speedY=1;
-				  }
-				}
-			  }
-			  else if(ghosts[g].y<pac.y){
-			    if(isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
-				  ghosts[g].speedY=1;
-				  ghosts[g].speedX=0;
-				}
-				else{
-				  ghosts[g].speedY=0;
-				  if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
-				    ghosts[g].speedX=1;
-				  }
-				  else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
-				    ghosts[g].speedX=-1;
-				  }
-				  else{
-				    ghosts[g].speedY=-1;
-				  }
-				}
-			  }
-			  else{
-			    ghosts[g].speedY=0;
-				if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
-				  ghosts[g].speedX=1;
-				}
-				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
-				  ghosts[g].speedX=-1;
-				}
-				else{
-				  if(isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
-				    ghosts[g].speedY=1;
-				  }
-				  else{
-				    ghosts[g].speedY=-1;
-				  }
-				}
-			  }
-	        }*/
 		      ghosts[g].newPos();
 			  ghosts[g].hitWall();
 		      ghosts[g].update();
