@@ -1,0 +1,664 @@
+<DOCTYPE html!>
+<html lang= "en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta charset="UTF-8"/>
+    <style>
+	  body{
+	    background-color: #101010
+	  }
+	  canvas{
+	    margin-left: 540px;
+		margin-top: 20px;
+	    border: 10px solid #1222CE;
+		background-color: #000000;
+	  }
+	</style>
+    <title>PACMAN</title>
+  </head>
+  <body onload= "startGame()">
+    <script>
+	  var pac;
+	  var ghosts= [];
+	  var score=0;
+	  var levelScore;
+	  var blocks= [];
+	  var door;
+	  var dots= [];
+	  function startGame(){
+	    var xCord=30;
+	    var yCord=30;
+	    pac= new component(405, 510, "yellow", 20, 20, "pacman", false, false);
+		ghosts[0]= new component(327, 330, "red", 20, 20, "ghost", false, false);
+		ghosts[1]= new component(369, 390, "cyan", 20, 20, "ghost", false, false);
+		ghosts[2]= new component(411, 390, "pink", 20, 20, "ghost", false, false);
+		ghosts[3]= new component(453, 390, "orange", 20, 20, "ghost", false, false);
+		blocks[0]= new component(390, -5, "#1222CE", 30, 125, "block", false, false);
+		blocks[1]= new component(300, 360, "#1222CE", 210, 120, "block", false, false);
+		door= new component(375, 360, "white", 60, 0, "block", false, false);
+		levelScore= new component(360, 450, "white", "20px", "Consolas", "text", false, false);
+		var count=1;
+		for(k=2;k<28;k++){
+		  if(k<6){
+		    blocks[k]= new component(60+600*(count-1), 60, "#1222CE", 90, 60, "block", false, false);
+			blocks[k+1]= new component(210+270*(count-1), 60, "#1222CE", 120, 60, "block", false, false);
+			count+=1;
+			k++;
+		  }
+		  else if(k<13){
+		    blocks[k]= new component(60, 180, "#1222CE", 90, 30, "block", false, false);
+			blocks[k+1]= new component(660, 180, "#1222CE", 90, 30, "block", false, false);
+			blocks[k+2]= new component(300, 180, "#1222CE", 210, 30, "block", false, false);
+			blocks[k+3]= new component(390, 180, "#1222CE", 30, 120, "block", false, false);
+			k+=3;
+			count=1;
+		  }
+		  else if(k<28){
+		    blocks[k]= new component(210+360*(count-1), 180, "#1222CE", 30, 210, "block", false, false);
+			blocks[k+1]= new component(210+360*(count-1), 450, "#1222CE", 30, 120, "block", false, false);
+			blocks[k+2]= new component(210, 270+360*(count-1), "#1222CE", 120, 30, "block", false, false);
+			blocks[k+3]= new component(480, 270+360*(count-1), "#1222CE", 120, 30, "block", false, false);
+			blocks[k+4]= new component(-5, 270+180*(count-1), "#1222CE", 155, 120, "block", false, false);
+			blocks[k+5]= new component(660, 270+180*(count-1), "#1222CE", 155, 120, "block", false, false);
+			blocks[k+6]= new component(300, 540+180*(count-1), "#1222CE", 210, 30, "block", false, false);
+			blocks[k+7]= new component(390, 540+180*(count-1), "#1222CE", 30, 120, "block", false, false);
+			blocks[k+8]= new component(60+600*(count-1), 630, "#1222CE", 90, 30, "block", false, false);
+			blocks[k+9]= new component(120+540*(count-1), 630, "#1222CE", 30, 120, "block", false, false);
+			blocks[k+10]= new component(-5+755*(count-1), 720, "#1222CE", 65, 30, "block", false, false);
+			blocks[k+11]= new component(60+420*(count-1), 810, "#1222CE", 270, 30, "block", false, false);
+			blocks[k+12]= new component(210+360*(count-1), 720, "#1222CE", 30, 120, "block", false, false);
+			k+=12;
+			count+=1;
+		  }
+		}
+		for(d=0;d<320;d++){
+	      if(xCord>=810){
+		    xCord=30;
+			yCord+=30;
+		  }
+		  for(b=0;b<40;b++){
+		    if((xCord>=blocks[b].x&&xCord<=blocks[b].x+blocks[b].width)&&(yCord>=blocks[b].y&&yCord<=blocks[b].y+blocks[b].height)){
+			  if(blocks[b].width%10==5){
+			    if(xCord<660){
+				  xCord-=5;
+				}
+			  }
+			  xCord+=blocks[b].width;
+			  b=40;
+			}
+		  }
+		  if((xCord>=210&&xCord<=600)&&(yCord>=270&&yCord<=570)){
+		    while(xCord<=600){
+			  xCord+=30;
+			}
+		  }
+		  if(((xCord>=0&&xCord<=150)||((xCord>=660&&xCord<=810)))&&(yCord>=390&&yCord<=450)){
+		    while(xCord<=150){
+			  xCord+=30;
+			}
+			while(xCord>=660&&xCord<=810){
+			  xCord+=30;
+			}
+		  }
+		  dots[d]= new component(xCord, yCord, "white", 5, 5, "dot", true, false);
+		  xCord+=30;
+		}
+		gameArea.start();
+	  }
+	  var gameArea={
+	    canvas: document.createElement("canvas"),
+		start: function(){
+		  this.canvas.width= 810;
+		  this.canvas.height= 900;
+		  this.context= this.canvas.getContext("2d");
+		  document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+		  document.addEventListener("keydown", function (event){
+	        if(event.defaultPrevented){
+		      return;
+		    }
+		    switch (event.key){
+		      case "ArrowUp":
+		        pac.speedY=-1;
+		        //pac.speedX=0;
+			    break;
+		      case "ArrowDown":
+		        pac.speedY=1;
+		        //pac.speedX=0;
+		   	    break;
+		      case "ArrowRight":
+		        //pac.speedY=0;
+		        pac.speedX=1;
+			    break;
+		      case "ArrowLeft":
+		        //pac.speedY=0;
+		        pac.speedX=-1;
+			    break;
+			  default:
+			    return;
+		    }
+	      });
+		  this.interval= setInterval(updateGameArea, 10);
+		},
+		clear: function(){
+		  this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		}
+	  };
+	  function component(x, y, color, width, height, type, edible, eaten){
+	    this.x= x;
+		this.y= y;
+		this.width= width;
+		this.height= height;
+		this.type= type;
+		this.edible= edible;
+		this.eaten= eaten;
+		if(type== "pacman"){
+		  this.speedX=0;
+		  this.speedY=0;
+		  this.hitWall= function(){
+		    if(this.x+this.width<0&&this.y+this.height<=420&&this.y-this.height>=360){
+			  this.x=810+this.width;
+			}
+			if(this.x-this.width>gameArea.canvas.width&&this.y+this.height<=420&&this.y-this.height>=360){
+			  this.x=-this.width;
+			}
+		    if(this.x-this.width<10||this.x+this.width>gameArea.canvas.width-10){
+			  if(this.y>=450||this.y<=390){
+			    this.speedX=0;
+				if(this.x-this.width<10){
+			      this.x+=1;
+			    }
+			    else{
+			      this.x-=1;
+			    }
+			  }
+			  else{
+			    if(this.x+this.width<5){
+				  this.x=805+this.width;
+				}
+				else if(this.x-this.width>805){
+				  this.x=5-this.width;
+				}
+			  }
+			}
+			if(this.y-this.height<10||this.y+this.height>gameArea.canvas.height-10){
+			  this.speedY=0;
+			  if(this.y-this.height<10){
+			    this.y+=1;
+			  }
+			  else{
+			    this.y-=1;
+			  }
+			}
+			for(b=0;b<40;b++){
+			  if((this.y-this.height-5<blocks[b].y+blocks[b].height+5&&this.y+this.height+5>blocks[b].y-5)&&(this.x-this.width-5<blocks[b].x+blocks[b].width+5&&this.x+this.width+5>blocks[b].x-5)){
+				if(this.speedY==-1){
+				  if(isWall(this.x, this.y-this.height-5)==true){
+				    this.y+=1;
+				    this.speedY=0;
+				  }
+				  else if(this.speedX==1&&isWall(this.x+this.width+5, this.y-this.height-5)==true){
+				    this.x-=1;
+				  }
+				  else if(this.speedX==-1&&isWall(this.x-this.width-5, this.y-this.height-5)==true){
+				    this.x+=1;
+				  }
+				  else{
+				    this.y+=1;
+				  }
+				}
+				if(this.speedY==1){
+				  if(isWall(this.x, this.y+this.height+5)==true){
+				    this.y-=1;
+				    this.speedY=0;
+				  }
+				  else if(this.speedX==1&&isWall(this.x+this.width+5, this.y+this.height+5)==true){
+				    this.x-=1;
+				  }
+				  else if(this.speedX==-1&&isWall(this.x-this.width-5, this.y+this.height+5)==true){
+				    this.x+=1;
+				  }
+				}
+				if(this.speedX==-1){
+				  if(isWall(this.x-this.width-5, this.y)==true){
+				    this.x+=1;
+				    this.speedX=0;
+				  }
+				  else if(this.speedY==1&&isWall(this.x+this.width+5, this.y+this.height+5)==true){
+				    this.y-=1;
+				  }
+				  else if(this.speedY==-1&&isWall(this.x+this.width+5, this.y-this.height-5)==true){
+				    this.y+=1;
+				  }
+				}
+				if(this.speedX==1){
+				  if(isWall(this.x+this.width+5, this.y)==true){
+				    this.x-=1;
+				    this.speedX=0;
+				  }
+				  else if(this.speedY==1&&isWall(this.x-this.width-5, this.y+this.height+5)==true){
+				    this.y-=1;
+				  }
+				  else if(this.speedY==-1&&isWall(this.x-this.width-5, this.y-this.height-5)==true){
+				    this.y+=1;
+				  }
+				}
+			  }
+			}
+		  };
+		}
+		else if(type== "ghost"){
+		  this.speedX=0;
+		  this.speedY=0;
+		  if(this.color=="red"){
+		    this.speedY=-1;
+		  }
+		  this.hitWall= function(){
+		    if(this.x+this.width<=0&&this.y+this.height<=420&&this.y-this.height>=360){
+			  this.x=gameArea.canvas.width+this.width;
+			}
+			if(this.x-this.width>=gameArea.canvas.width&&this.y+this.height<=420&&this.y-this.height>=360){
+			  this.x=-this.width;
+			}
+		    if(this.x-this.width<5||this.x+this.width>gameArea.canvas.width-5){
+			  this.speedX=0;
+			}
+			if(this.y-this.height<5||this.y+this.height>gameArea.canvas.height-5){
+			  this.speedY=0;
+			}
+			for(b=0;b<40;b++){
+			  if((this.y+this.height+5>blocks[b].y-5&&this.y-this.height-5<blocks[b].y+blocks[b].height+5)&&(this.x-this.width-5<blocks[b].x+blocks[b].width+5&&this.x+this.width+5>blocks[b].x-5)){
+				if(this.y+this.height+5>blocks[b].y-5){
+				  this.speedY=0;
+				  this.y+=1;
+				}
+				if(this.y-this.height-5<blocks[b].y+blocks[b].height+5){
+				  this.speedY=0;
+				  this.y-=1;
+				}
+				if(this.x-this.width-5<blocks[b].x+blocks[b].width+5){
+				  this.speedX=0;
+				  this.x+=1;
+				}
+				if(this.x+this.width+5>blocks[b].x-5){
+				  this.speedX=0;
+				  this.x-=1;
+				}
+			  }
+			}
+		  };
+		}
+		this.newPos= function(){
+		    this.x+=this.speedX;
+		    this.y+=this.speedY;
+		};
+		this.update= function() {
+		  ctx=gameArea.context;
+		  if(type== "pacman"){
+		    ctx.fillStyle= color;
+			ctx.beginPath();
+			if(this.speedX==1){
+			  ctx.arc(this.x, this.y, this.width, Math.PI/6, 11*Math.PI/6, false);
+			}
+			else if(this.speedX==-1){
+			  ctx.arc(this.x, this.y, this.width, 5*Math.PI/6, 7*Math.PI/6, true);
+			}
+			else if(this.speedY==1){
+			  ctx.arc(this.x, this.y, this.width, Math.PI/3, 2*Math.PI/3, true);
+			}
+			else if(this.speedY==-1){
+			  ctx.arc(this.x, this.y, this.width, 4*Math.PI/3, 5*Math.PI/3, true);
+			}
+			else{
+			  ctx.arc(this.x, this.y, this.width, 0, 2*Math.PI, false);
+			}
+			ctx.lineTo(this.x, this.y);
+			ctx.closePath();
+			ctx.fill();
+		  }
+		  else if(type== "ghost"){
+		    ctx.beginPath();
+		    ctx.arc(this.x, this.y, this.width, 0, Math.PI, true);
+			ctx.lineTo(this.x-this.width, this.y+this.height);
+			ctx.lineTo(this.x-2*this.width/3, this.y+this.height/1.5);
+			ctx.lineTo(this.x-this.width/3, this.y+this.height);
+			ctx.lineTo(this.x, this.y+this.height/1.5);
+			ctx.lineTo(this.x+this.width/3, this.y+this.height);
+			ctx.lineTo(this.x+2*this.width/3, this.y+this.height/1.5);
+			ctx.lineTo(this.x+this.width, this.y+this.height);
+			ctx.lineTo(this.x+this.width, this.y);
+			ctx.closePath();
+		    if(this.edible==false){
+		      ctx.fillStyle= color;
+			  ctx.fill();
+			  ctx.fillStyle= "white";
+			  ctx.beginPath();
+			  ctx.arc(this.x-7, this.y-5, 6, 0, 2*Math.PI, false);
+			  ctx.arc(this.x+7, this.y-5, 6, 0, 2*Math.PI, false);
+			  ctx.closePath();
+			  ctx.fill();
+			  ctx.fillStyle= "blue";
+			  ctx.beginPath();
+			  ctx.arc(this.x-6, this.y-5, 4, 0, 2*Math.PI, false);
+			  ctx.arc(this.x+8, this.y-5, 4, 0, 2*Math.PI, false);
+			  ctx.closePath();
+			  ctx.fill();
+	        }
+		    else{
+			  ctx.fillStyle= "#1222CE";
+			  ctx.fill();
+			  ctx.fillStyle= "white";
+		      ctx.beginPath();
+			  ctx.arc(this.x-7, this.y-5, 6, 0, 2*Math.PI, false);
+			  ctx.arc(this.x+7, this.y-5, 6, 0, 2*Math.PI, false);
+			  ctx.closePath();
+			  ctx.fill();
+			  ctx.beginPath();
+			  ctx.moveTo(this.x-this.width+5, this.y+this.height/2);
+			  ctx.lineTo(this.x-this.width+10, this.y+this.height/3);
+			  ctx.lineTo(this.x-this.width+15, this.y+this.height/2);
+			  ctx.lineTo(this.x, this.y+this.height/3);
+			  ctx.lineTo(this.x+this.width-15, this.y+this.height/2);
+			  ctx.lineTo(this.x+this.width-10, this.y+this.height/3);
+			  ctx.lineTo(this.x+this.width-5, this.y+this.height/2);
+			  ctx.moveTo(this.x-7, this.y-5);
+			  ctx.closePath();
+			  ctx.lineWidth= 3;
+			  ctx.strokeStyle= "white";
+			  ctx.stroke();
+		    }
+		  }
+		  else if(type== "dot"){
+		    ctx.fillStyle= color;
+			ctx.beginPath();
+		    ctx.arc(this.x, this.y, this.width, 0, 2*Math.PI, true);
+		    ctx.closePath();
+			ctx.fill();
+		  }
+		  else if(type== "block"){
+			ctx.strokeStyle= color;
+			ctx.lineWidth= 10;
+			ctx.beginPath();
+			ctx.lineCap= "round";
+			ctx.moveTo(this.x, this.y);
+			ctx.lineTo(this.x+this.width, this.y);
+			ctx.lineTo(this.x+this.width, this.y+this.height);
+			ctx.lineTo(this.x, this.y+this.height);
+			ctx.lineTo(this.x, this.y);
+			ctx.closePath();
+			ctx.stroke();
+		  }
+		  else{
+		    this.text= "SCORE: "+String(score);
+		    ctx.font= this.width+" "+this.height;
+            ctx.fillStyle= color;
+            ctx.fillText(this.text, this.x, this.y);
+		  }
+		};
+	  }
+	  function eat(food){
+	    if(food==dots){
+	      for(i=0;i<320;i++){
+		    if(dots[i].eaten==false){
+		      if(pac.x+pac.width>dots[i].x && pac.x-pac.width<dots[i].x && pac.y+pac.height>dots[i].y && pac.y-pac.height<dots[i].y){
+			    dots[i].eaten=true;
+			    score+=10;
+		      }
+		    }
+		  }
+	    }
+	    else if(food==ghosts){
+		  for(i=0;i<4;i++){
+		    if(ghosts[i].edible==true && ghosts[i].eaten==false){
+		      if(pac.x+pac.width>ghosts[i].x && pac.x-pac.width<ghosts[i].x && pac.y+pac.height>ghosts[i].y && pac.y-pac.height<ghosts[i].y){
+		        ghosts[i].eaten=true;
+			    ghosts[i].edible=false;
+			    score+=200;
+		      }
+		    }
+		  }
+		}
+	  }
+	  function isWall(x, y){
+	    var hit=false;
+	    for(b=0;b<40;b++){
+		  if(((x<=blocks[b].x+blocks[b].width+5&&x>=blocks[b].x-5)&&(y<=blocks[b].y+blocks[b].height+5&&y>=blocks[b].y-5))||x==5||x==gameArea.canvas.width-5||y==5||y==gameArea.canvas.height-5){
+		    hit=true;
+		  }
+		}
+		return hit;
+	  }
+	  function velocity(ghost){
+	    if(ghost.speedY==-1){
+		  return "-y";
+		}
+		else if(ghost.speedY==1){
+		  return "y";
+		}
+		else if(ghost.speedX==-1){
+		  return "-x";
+		}
+		else if(ghost.speedX==1){
+		  return "x";
+		}
+		else{
+		  return "0";
+		}
+	  }
+	  function updateGameArea(){
+	    gameArea.clear();
+		pac.newPos();
+		eat(ghosts);
+		eat(dots);
+		pac.hitWall();
+		pac.update();
+		for(d=0;d<320;d++){
+		  if(dots[d].eaten==false){
+		    dots[d].update();
+		  }
+		}
+		for(g=0;g<4;g++){
+		  if(ghosts[g].eaten==false){
+	        if(g==0){
+			  if(velocity(ghosts[g])=="x"){
+			    if(isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==true){
+				  ghosts[g].speedX=0;
+				  if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				    ghosts[g].speedY=1;
+				  }
+				  else{
+				    ghosts[g].speedY=-1;
+				  }
+				}
+			    if(ghosts[g].y<pac.y&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y+ghosts[g].height+5)==false){
+				  ghosts[g].speedX=0;
+				  ghosts[g].speedY=1;
+				}
+				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y-ghosts[g].height-5)==false){
+				  ghosts[g].speedX=0;
+				  ghosts[g].speedY=-1;
+				}
+			  }
+			  else if(velocity(ghosts[g])=="-x"){
+			    if(isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==true){
+				  ghosts[g].speedX=0;
+				  if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				    ghosts[g].speedY=1;
+				  }
+				  else{
+				    ghosts[g].speedY=-1;
+				  }
+				}
+			    if(ghosts[g].y<pac.y&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y+ghosts[g].height+5)==false){
+				  ghosts[g].speedX=0;
+				  ghosts[g].speedY=1;
+				}
+				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y-ghosts[g].height-5)==false){
+				  ghosts[g].speedX=0;
+				  ghosts[g].speedY=-1;
+				}
+			  }
+			  else if(velocity(ghosts[g])=="y"){
+			    if(isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==true){
+				  ghosts[g].speedY=0;
+				  if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				    ghosts[g].speedX=1;
+				  }
+				  else{
+				    ghosts[g].speedX=-1;
+				  }
+				}
+			    if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y-ghosts[g].width-5)==false){
+				  ghosts[g].speedY=0;
+				  ghosts[g].speedX=1;
+				}
+				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y-ghosts[g].width-5)==false){
+				  ghosts[g].speedY=0;
+				  ghosts[g].speedX=-1;
+				}
+			  }
+			  else{
+			    if(isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==true){
+				  ghosts[g].speedY=0;
+				  if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				    ghosts[g].speedX=1;
+				  }
+				  else{
+				    ghosts[g].speedX=-1;
+				  }
+				}
+			    if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y+ghosts[g].height+5)==false){
+				  ghosts[g].speedY=0;
+				  ghosts[g].speedX=1;
+				}
+				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y+ghosts[g].height+5)==false){
+				  ghosts[g].speedY=0;
+				  ghosts[g].speedX=-1;
+				}
+			  }
+			  if(ghosts[g].x==pac.x&&ghosts[g].y==pac.y){
+			    ghosts[g].speedX=0;
+				ghosts[g].speedY=0;
+			  }
+			  /*if(ghosts[g].x>pac.x){
+			    if(isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
+				  ghosts[g].speedX=-1;
+				  ghosts[g].speedY=0;
+				}
+				else{
+				  ghosts[g].speedX=0;
+				  if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				    ghosts[g].speedY=1;
+				  }
+				  else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
+				    ghosts[g].speedY=-1;
+				  }
+				  else{
+				    ghosts[g].speedX=1;
+				  }
+				}
+			  }
+			  else if(ghosts[g].x<pac.x){
+			    if(isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				  ghosts[g].speedX=1;
+				  ghosts[g].speedY=0;
+				}
+				else{
+				  ghosts[g].speedX=0;
+				  if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				    ghosts[g].speedY=1;
+				  }
+				  else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
+				  ghosts[g].speedY=-1;
+				  }
+				  else{
+				    ghosts[g].speedX=-1;
+				  }
+				}
+			  }
+			  else{
+			    ghosts[g].speedX=0;
+				if(ghosts[g].y<pac.y&&isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				  ghosts[g].speedY=1;
+				}
+				else if(ghosts[g].y>pac.y&&isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
+				  ghosts[g].speedY=-1;
+				}
+				else{
+				  if(isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				    ghosts[g].speedX=1;
+				  }
+				  else{
+				    ghosts[g].speedX=-1;
+				  }
+				}
+			  }
+			  if(ghosts[g].y>pac.y){
+			    if(isWall(ghosts[g].x, ghosts[g].y-ghosts[g].height-5)==false){
+				  ghosts[g].speedY=-1;
+				  ghosts[g].speedX=0;
+				}
+				else{
+				  ghosts[g].speedY=0;
+				  if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				    ghosts[g].speedX=1;
+				  }
+				  else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
+				    ghosts[g].speedX=-1;
+				  }
+				  else{
+				    ghosts[g].speedY=1;
+				  }
+				}
+			  }
+			  else if(ghosts[g].y<pac.y){
+			    if(isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				  ghosts[g].speedY=1;
+				  ghosts[g].speedX=0;
+				}
+				else{
+				  ghosts[g].speedY=0;
+				  if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				    ghosts[g].speedX=1;
+				  }
+				  else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
+				    ghosts[g].speedX=-1;
+				  }
+				  else{
+				    ghosts[g].speedY=-1;
+				  }
+				}
+			  }
+			  else{
+			    ghosts[g].speedY=0;
+				if(ghosts[g].x<pac.x&&isWall(ghosts[g].x+ghosts[g].width+5, ghosts[g].y)==false){
+				  ghosts[g].speedX=1;
+				}
+				else if(ghosts[g].x>pac.x&&isWall(ghosts[g].x-ghosts[g].width-5, ghosts[g].y)==false){
+				  ghosts[g].speedX=-1;
+				}
+				else{
+				  if(isWall(ghosts[g].x, ghosts[g].y+ghosts[g].height+5)==false){
+				    ghosts[g].speedY=1;
+				  }
+				  else{
+				    ghosts[g].speedY=-1;
+				  }
+				}
+			  }
+	        }*/
+		      ghosts[g].newPos();
+			  ghosts[g].hitWall();
+		      ghosts[g].update();
+	        }
+		  }
+		  for(b=0;b<40;b++){
+		    blocks[b].update();
+		  }
+		  door.update();
+		  levelScore.text= "SCORE: "+String(score);
+		  levelScore.update();
+	    }
+	  }
+	</script>
+  </body>
+</html>
